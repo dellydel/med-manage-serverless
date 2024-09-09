@@ -8,9 +8,9 @@ dynamodb = boto3.resource('dynamodb')
 client = boto3.client('dynamodb')
 table = dynamodb.Table(os.environ.get('ORGANIZATIONS_TABLE'))
 
-def get_organization(organizationId):
+def get_organization(orgId):
     try:
-        response = table.get_item(Key={'id': organizationId})
+        response = table.get_item(Key={'orgId': orgId})
         if 'Item' in response:
             return create_response(200, response['Item'])
         else:

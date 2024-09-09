@@ -71,7 +71,7 @@ resources:
                       - dynamodb:Query
                       - dynamodb:UpdateItem
                     Resource:
-                      - arn:aws:dynamodb:us-east-1:893303684985:table/med-manage-organizations-${opt:stage}
+                      - arn:aws:dynamodb:us-east-1:893303684985:table/organizations-${opt:stage}
                   - Effect: Allow
                     Action:
                       - logs:CreateLogStream
