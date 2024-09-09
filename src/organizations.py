@@ -10,7 +10,7 @@ table = dynamodb.Table(os.environ.get('ORGANIZATIONS_TABLE'))
 
 def get_organization(orgId):
     try:
-        response = table.get_item(Key={'orgId': orgId})
+        response = table.get_item(Key={'organizationId': orgId})
         if 'Item' in response:
             return create_response(200, response['Item'])
         else:
