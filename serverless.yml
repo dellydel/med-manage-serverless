@@ -32,6 +32,7 @@ functions:
     package:
       patterns:
         - src/organizations.py
+        - src/organizations_handler_get.py
     handler: src/organizations_handler_get.handler
     events:
       - http:
