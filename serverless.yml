@@ -1,0 +1,84 @@
+service: med-manage-serverless-${opt:stage}
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.11
+  stackName: med-manage-serverless-${opt:stage}
+  environment: ${file(env.yml):${self:custom.stage}}
+  apiGateway:
+    restApiId: ${ssm:med-manage-api-restApiId-${opt:stage}}
+    restApiRootResourceId: ${ssm:med-manage-api-restApiRootResourceId-${opt:stage}}
+  iam:
+    role: IAMServerlessRoleMedManage
+custom:
+  stage: ${opt:stage}
+  pythonRequirements:
+    layer: true
+
+package:
+  individually: true
+  patterns:
+    - '!./**'
+    - 'src/http_response.py'
+    - 'src/utils/unmarshall.py'
+    - '!package.json'
+    - '!package-lock.json'
+    - '!node_modules/**'
+
+functions:
+  organizations:
+    name: organization-lambda-${opt:stage}   
+    package:
+      patterns:
+        - src/organizations.py
+    handler: src/organizations_handler_get.handler
+    events:
+      - http:
+          path: /organizations
+          method: get
+  
+resources:
+  - Resources:
+      IAMServerlessRoleMedManage:
+        Type: AWS::IAM::Role
+        Properties:
+          AssumeRolePolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Principal:
+                  Service:
+                    - lambda.amazonaws.com
+                Action:
+                  - sts:AssumeRole
+          Policies:
+            - PolicyName: Policy_api-lambda-db
+              PolicyDocument:
+                Version: '2012-10-17'
+                Statement:
+                  - Effect: Allow
+                    Action:
+                      - dynamodb:BatchGetItem
+                      - dynamodb:BatchWriteItem
+                      - dynamodb:TagResource
+                      - dynamodb:UntagResource
+                      - dynamodb:PutItem
+                      - dynamodb:DeleteItem
+                      - dynamodb:GetItem
+                      - dynamodb:Scan
+                      - dynamodb:Query
+                      - dynamodb:UpdateItem
+                    Resource:
+                      - arn:aws:dynamodb:us-east-1:893303684985:table/med-manage-organizations-${opt:stage}
+                  - Effect: Allow
+                    Action:
+                      - logs:CreateLogStream
+                      - logs:CreateLogGroup
+                      - logs:PutLogEvents
+                    Resource: '*'
+
+plugins:
+  - serverless-offline
+  - serverless-python-requirements
+
