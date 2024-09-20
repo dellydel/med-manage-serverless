@@ -27,8 +27,8 @@ package:
     - '!node_modules/**'
 
 functions:
-  organizations:
-    name: organization-lambda-${opt:stage}   
+  organizations-get:
+    name: organization-lambda-get-${opt:stage}   
     package:
       patterns:
         - src/organizations.py
@@ -38,7 +38,19 @@ functions:
       - http:
           path: /organizations
           method: get
-  
+
+  organizations-post:
+    name: organization-lambda-post-${opt:stage}   
+    package:
+      patterns:
+        - src/organizations.py
+        - src/organizations_handler_post.py
+    handler: src/organizations_handler_post.handler
+    events:
+      - http:
+          path: /organizations
+          method: post
+
 resources:
   - Resources:
       IAMServerlessRoleMedManage:
@@ -72,12 +84,21 @@ resources:
                       - dynamodb:UpdateItem
                     Resource:
                       - arn:aws:dynamodb:us-east-1:893303684985:table/organizations-${opt:stage}
+                  
                   - Effect: Allow
                     Action:
                       - logs:CreateLogStream
                       - logs:CreateLogGroup
                       - logs:PutLogEvents
                     Resource: '*'
+                  
+                  - Effect: Allow
+                    Action:
+                      - cognito-idp:CreateGroup
+                      - cognito-idp:AdminAddUserToGroup
+                      - cognito-idp:AdminUpdateUserAttributes
+                    Resource: arn:aws:cognito-idp:<region>:<account-id>:userpool/<user-pool-id>
+                    
 
 plugins:
   - serverless-offline
