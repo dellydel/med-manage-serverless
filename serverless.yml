@@ -97,7 +97,7 @@ resources:
                       - cognito-idp:CreateGroup
                       - cognito-idp:AdminAddUserToGroup
                       - cognito-idp:AdminUpdateUserAttributes
-                    Resource: arn:aws:cognito-idp:<region>:<account-id>:userpool/<user-pool-id>
+                    Resource: arn:aws:cognito-idp:us-east-1:893303684985:userpool/us-east-1_cx21iBehL
                     
 
 plugins:
