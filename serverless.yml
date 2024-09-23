@@ -49,6 +49,7 @@ functions:
       - http:
           path: /organizations
           method: post
+          cors: true
 
   login-post:
     name: login-lambda-post-${opt:stage}
@@ -61,6 +62,7 @@ functions:
       - http:
           path: /login
           method: post
+          cors: true
 
   update-password-post:
     name: update-password-lambda-post-${opt:stage}
@@ -73,6 +75,7 @@ functions:
       - http:
           path: /update-password
           method: post
+          cors: true
 
 resources:
   - Resources:
