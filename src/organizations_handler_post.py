@@ -1,7 +1,8 @@
 import uuid
 from datetime import datetime, timezone
 import json
-from src.organizations import create_organization, create_cognito_group, add_user_to_group, update_user_org_id, create_cognito_user
+from src.organizations import create_organization
+from src.authorization import create_cognito_group, add_user_to_group, update_user_org_id, create_cognito_user
 from src.http_response import create_response
 
 def handler(event, _):

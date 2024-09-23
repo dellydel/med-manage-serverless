@@ -1,5 +1,5 @@
 service: med-manage-serverless-${opt:stage}
-frameworkVersion: '3'
+frameworkVersion: "3"
 
 provider:
   name: aws
@@ -19,16 +19,16 @@ custom:
 package:
   individually: true
   patterns:
-    - '!./**'
-    - 'src/http_response.py'
-    - 'src/utils/unmarshall.py'
-    - '!package.json'
-    - '!package-lock.json'
-    - '!node_modules/**'
+    - "!./**"
+    - "src/http_response.py"
+    - "src/utils/unmarshall.py"
+    - "!package.json"
+    - "!package-lock.json"
+    - "!node_modules/**"
 
 functions:
   organizations-get:
-    name: organization-lambda-get-${opt:stage}   
+    name: organization-lambda-get-${opt:stage}
     package:
       patterns:
         - src/organizations.py
@@ -40,15 +40,38 @@ functions:
           method: get
 
   organizations-post:
-    name: organization-lambda-post-${opt:stage}   
+    name: organization-lambda-post-${opt:stage}
     package:
       patterns:
-        - src/organizations.py
         - src/organizations_handler_post.py
     handler: src/organizations_handler_post.handler
     events:
       - http:
           path: /organizations
+          method: post
+
+  login-post:
+    name: login-lambda-post-${opt:stage}
+    package:
+      patterns:
+        - src/authorization.py
+        - src/login_handler_post.py
+    handler: src/login_handler_post.handler
+    events:
+      - http:
+          path: /login
+          method: post
+
+  update-password-post:
+    name: update-password-lambda-post-${opt:stage}
+    package:
+      patterns:
+        - src/authorization.py
+        - src/update_password_handler_post.py
+    handler: src/update_password_handler_post.handler
+    events:
+      - http:
+          path: /update-password
           method: post
 
 resources:
@@ -57,7 +80,7 @@ resources:
         Type: AWS::IAM::Role
         Properties:
           AssumeRolePolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Principal:
@@ -68,7 +91,7 @@ resources:
           Policies:
             - PolicyName: Policy_api-lambda-db
               PolicyDocument:
-                Version: '2012-10-17'
+                Version: "2012-10-17"
                 Statement:
                   - Effect: Allow
                     Action:
@@ -84,23 +107,22 @@ resources:
                       - dynamodb:UpdateItem
                     Resource:
                       - arn:aws:dynamodb:us-east-1:893303684985:table/organizations-${opt:stage}
-                  
+
                   - Effect: Allow
                     Action:
                       - logs:CreateLogStream
                       - logs:CreateLogGroup
                       - logs:PutLogEvents
-                    Resource: '*'
-                  
+                    Resource: "*"
+
                   - Effect: Allow
                     Action:
                       - cognito-idp:CreateGroup
                       - cognito-idp:AdminAddUserToGroup
                       - cognito-idp:AdminUpdateUserAttributes
+                      - cognito-idp:Authenticate
                     Resource: arn:aws:cognito-idp:us-east-1:893303684985:userpool/us-east-1_cx21iBehL
-                    
 
 plugins:
   - serverless-offline
   - serverless-python-requirements
-
