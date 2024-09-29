@@ -27,6 +27,18 @@ package:
     - "!node_modules/**"
 
 functions:
+  patients-get:
+    name: patients-lambda-get-${opt:stage}
+    package:
+      patterns:
+        - src/patients.py
+        - src/patients_handler_get.py
+    handler: src/patients_handler_get.handler
+    events:
+      - http:
+          path: /patients
+          method: get
+
   employees-get:
     name: employees-lambda-get-${opt:stage}
     package:
@@ -136,6 +148,7 @@ resources:
                     Resource:
                       - arn:aws:dynamodb:us-east-1:893303684985:table/organizations-${opt:stage}
                       - arn:aws:dynamodb:us-east-1:893303684985:table/employees-${opt:stage}
+                      - arn:aws:dynamodb:us-east-1:893303684985:table/patients-${opt:stage}
 
                   - Effect: Allow
                     Action:

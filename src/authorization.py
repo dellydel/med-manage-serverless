@@ -93,7 +93,6 @@ def login_user(email, password):
                 'USERNAME': email,
                 'PASSWORD': password
             },
-            Attributes=['custom:organizationId'] 
         ) 
 
         if response.get('ChallengeName') == 'NEW_PASSWORD_REQUIRED':
@@ -104,12 +103,10 @@ def login_user(email, password):
             access_token = authentication_result['AccessToken']
             id_token = authentication_result['IdToken']
             refresh_token = authentication_result['RefreshToken']
-            custom_attribute = authentication_result['Attributes'].get('custom:organizationId')
             return create_response(200, {
                 'accessToken': access_token,
                 'idToken': id_token,
                 'refreshToken': refresh_token,
-                'orgId': custom_attribute
             })
     
     except cognito_client.exceptions.NotAuthorizedException:
