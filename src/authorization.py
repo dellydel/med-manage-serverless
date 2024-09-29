@@ -17,9 +17,11 @@ def create_cognito_group(org_id, org_name):
     )
 
 def create_admin_user(email, org_id):
+    username=str(uuid.uuid4())
+
     cognito_client.admin_create_user(
         UserPoolId=user_pool_id,
-        Username=str(uuid.uuid4()),
+        Username=username,
         UserAttributes=[
             {'Name': 'email', 'Value': email},
             {'Name': 'email_verified', 'Value': 'true'},
@@ -27,6 +29,23 @@ def create_admin_user(email, org_id):
         ],
         TemporaryPassword='TemporaryPassword123!',
         MessageAction='SUPPRESS'
+    )
+
+    cognito_client.admin_add_user_to_group(
+        UserPoolId=user_pool_id,
+        GroupName=org_id,
+        Username=username
+    )
+
+    cognito_client.admin_update_user_attributes(
+        UserAttributes=[
+            {
+                'Name': 'custom:organizationId',
+                'Value': org_id, 
+            },
+        ],
+        UserPoolId=user_pool_id,
+        Username=username
     )
 
 def signup_new_user(full_name, email, org_id, user_type):
@@ -62,25 +81,6 @@ def signup_new_user(full_name, email, org_id, user_type):
             'statusCode': 500,
             'body': json.dumps({'message': 'Failed to create user'})
         }
-    
-def add_user_to_group(username, org_id):
-    cognito_client.admin_add_user_to_group(
-        GroupName=org_id,
-        UserPoolId=user_pool_id,
-        Username=username
-    )
-
-def update_user_org_id(username, org_id):
-    cognito_client.admin_update_user_attributes(
-        UserAttributes=[
-            {
-                'Name': 'custom:organizationId',
-                'Value': org_id, 
-            },
-        ],
-        UserPoolId=user_pool_id,
-        Username=username
-    )
 
 def login_user(email, password):
     cognito_client = boto3.client('cognito-idp')
