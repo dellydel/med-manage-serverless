@@ -77,6 +77,19 @@ functions:
           method: post
           cors: true
 
+  new-user-post:
+    name: new-user-lambda-post-${opt:stage}
+    package:
+      patterns:
+        - src/new_user.py
+        - src/new_user_handler_post.py
+    handler: src/new_user_handler_post.handler
+    events:
+      - http:
+          path: /new-user
+          method: post
+          cors: true
+
 resources:
   - Resources:
       IAMServerlessRoleMedManage:
@@ -122,8 +135,12 @@ resources:
                     Action:
                       - cognito-idp:CreateGroup
                       - cognito-idp:AdminAddUserToGroup
+                      - cognito-idp:AdminCreateUser
                       - cognito-idp:AdminUpdateUserAttributes
                       - cognito-idp:Authenticate
+                      - cognito-idp:ListUsers
+                      - cognito-idp:InitiateAuth
+                      - cognito-idp:RespondToAuthChallenge
                     Resource: arn:aws:cognito-idp:us-east-1:893303684985:userpool/us-east-1_cx21iBehL
 
 plugins:
