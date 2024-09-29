@@ -1,10 +1,13 @@
 import boto3
 import os
-
+import uuid
+import json 
+from botocore.exceptions import ClientError
 from src.http_response import create_response
 
 cognito_client = boto3.client('cognito-idp')
 user_pool_id = os.environ.get('USER_POOL_ID')
+client_id = os.environ.get('COGNITO_CLIENT_ID')
 
 def create_cognito_group(org_id, org_name):
     cognito_client.create_group(
@@ -13,10 +16,10 @@ def create_cognito_group(org_id, org_name):
         Description=f'Group for organization: {org_name}'
     )
 
-def create_cognito_user(username, email, org_id):
+def create_admin_user(email, org_id):
     cognito_client.admin_create_user(
         UserPoolId=user_pool_id,
-        Username=username,
+        Username=str(uuid.uuid4()),
         UserAttributes=[
             {'Name': 'email', 'Value': email},
             {'Name': 'email_verified', 'Value': 'true'},
@@ -26,6 +29,40 @@ def create_cognito_user(username, email, org_id):
         MessageAction='SUPPRESS'
     )
 
+def signup_new_user(full_name, email, org_id, user_type):
+    user_pool_id = os.environ.get('USER_POOL_ID')
+    username = str(uuid.uuid4())
+    
+    try:
+        cognito_client.admin_create_user(
+            UserPoolId=user_pool_id,
+            Username=username,
+            UserAttributes=[
+                {'Name': 'email', 'Value': email},
+                {'Name': 'custom:full_name', 'Value': full_name},
+                {'Name': 'custom:user_type', 'Value': user_type}    
+            ],
+            TemporaryPassword='TemporaryPassword123!',
+            MessageAction='SUPPRESS'
+        )
+
+        cognito_client.admin_add_user_to_group(
+            UserPoolId=user_pool_id,
+            GroupName=org_id,
+            Username=username
+        )
+
+        return {
+            'statusCode': 200,
+            'body': json.dumps({'message': 'User created successfully'})
+        }
+    except ClientError as e:
+        print(f"Error creating user: {e}")
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'message': 'Failed to create user'})
+        }
+    
 def add_user_to_group(username, org_id):
     cognito_client.admin_add_user_to_group(
         GroupName=org_id,
@@ -55,21 +92,24 @@ def login_user(email, password):
             AuthParameters={
                 'USERNAME': email,
                 'PASSWORD': password
-            }
+            },
+            Attributes=['custom:organizationId'] 
         ) 
 
         if response.get('ChallengeName') == 'NEW_PASSWORD_REQUIRED':
            return create_response(200, {"session": response['Session'], "message": "Password Update Required"})
 
         else:
-            access_token = response['AuthenticationResult']['AccessToken']
-            id_token = response['AuthenticationResult']['IdToken']
-            refresh_token = response['AuthenticationResult']['RefreshToken']
-            
+            authentication_result = response['AuthenticationResult']
+            access_token = authentication_result['AccessToken']
+            id_token = authentication_result['IdToken']
+            refresh_token = authentication_result['RefreshToken']
+            custom_attribute = authentication_result['Attributes'].get('custom:organizationId')
             return create_response(200, {
                 'accessToken': access_token,
                 'idToken': id_token,
-                'refreshToken': refresh_token
+                'refreshToken': refresh_token,
+                'orgId': custom_attribute
             })
     
     except cognito_client.exceptions.NotAuthorizedException:
