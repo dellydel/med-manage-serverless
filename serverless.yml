@@ -27,6 +27,18 @@ package:
     - "!node_modules/**"
 
 functions:
+  employees-get:
+    name: employees-lambda-get-${opt:stage}
+    package:
+      patterns:
+        - src/employees.py
+        - src/employees_handler_get.py
+    handler: src/employees_handler_get.handler
+    events:
+      - http:
+          path: /employees
+          method: get
+
   organizations-get:
     name: organization-lambda-get-${opt:stage}
     package:
@@ -123,6 +135,7 @@ resources:
                       - dynamodb:UpdateItem
                     Resource:
                       - arn:aws:dynamodb:us-east-1:893303684985:table/organizations-${opt:stage}
+                      - arn:aws:dynamodb:us-east-1:893303684985:table/employees-${opt:stage}
 
                   - Effect: Allow
                     Action:
