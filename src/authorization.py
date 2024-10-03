@@ -49,6 +49,7 @@ def create_admin_user(email, org_id):
     )
 
 def signup_new_user(full_name, email, org_id, user_type):
+    # TODO: validate that user email does not already exist
     user_pool_id = os.environ.get('USER_POOL_ID')
     username = str(uuid.uuid4())
     
@@ -76,7 +77,7 @@ def signup_new_user(full_name, email, org_id, user_type):
             'body': json.dumps({'message': 'User created successfully'})
         }
     except ClientError as e:
-        print(f"Error creating user: {e}")
+        print(f"Error creating user: {str(e)}")
         return {
             'statusCode': 500,
             'body': json.dumps({'message': 'Failed to create user'})
@@ -84,10 +85,11 @@ def signup_new_user(full_name, email, org_id, user_type):
 
 def login_user(email, password):
     cognito_client = boto3.client('cognito-idp')
-    
+    med_manage_client_id = os.environ.get('COGNITO_CLIENT_ID')
+
     try:
         response = cognito_client.initiate_auth(
-            ClientId='5ml7sonmg6j630uaki7fkfaj06',
+            ClientId=med_manage_client_id,
             AuthFlow='USER_PASSWORD_AUTH',
             AuthParameters={
                 'USERNAME': email,
@@ -96,7 +98,7 @@ def login_user(email, password):
         ) 
 
         if response.get('ChallengeName') == 'NEW_PASSWORD_REQUIRED':
-           return create_response(200, {"session": response['Session'], "message": "Password Update Required"})
+           return create_response(200, {"session": response['Session'], "message": "Password Update Required."})
 
         else:
             authentication_result = response['AuthenticationResult']
@@ -110,6 +112,7 @@ def login_user(email, password):
             })
     
     except cognito_client.exceptions.NotAuthorizedException:
+        # TODO: need to return appropriate response (invalid email, or email not confirmed)
         return create_response(401, 'Invalid email or password')
     except Exception as e:
         return create_response(500, str(e))
