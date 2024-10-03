@@ -84,12 +84,9 @@ def signup_new_user(full_name, email, org_id, user_type):
         }
 
 def login_user(email, password):
-    cognito_client = boto3.client('cognito-idp')
-    med_manage_client_id = os.environ.get('COGNITO_CLIENT_ID')
-
     try:
         response = cognito_client.initiate_auth(
-            ClientId=med_manage_client_id,
+            ClientId=client_id,
             AuthFlow='USER_PASSWORD_AUTH',
             AuthParameters={
                 'USERNAME': email,
@@ -119,7 +116,7 @@ def login_user(email, password):
 
 def update_user_password(email, new_password, session):
     challenge_response = cognito_client.respond_to_auth_challenge(
-        ClientId='5ml7sonmg6j630uaki7fkfaj06',
+        ClientId=client_id,
         ChallengeName='NEW_PASSWORD_REQUIRED',
         Session=session,
         ChallengeResponses={
@@ -140,6 +137,3 @@ def update_user_password(email, new_password, session):
         })
     else:
         create_response(401, "Failed to authenticate after new password update.")
-
-def logout_user():
-   pass
