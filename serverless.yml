@@ -50,6 +50,10 @@ functions:
       - http:
           path: /employees
           method: get
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: MedManageCognitoAuthorizer
 
   organizations-get:
     name: organization-lambda-get-${opt:stage}
