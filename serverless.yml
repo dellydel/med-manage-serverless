@@ -38,6 +38,11 @@ functions:
       - http:
           path: /patients
           method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: MedManageCognitoAuthorizer
 
   employees-get:
     name: employees-lambda-get-${opt:stage}
@@ -118,6 +123,10 @@ functions:
           path: /new-user
           method: post
           cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: MedManageCognitoAuthorizer
 
 resources:
   - Resources:
