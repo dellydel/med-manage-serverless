@@ -169,6 +169,16 @@ resources:
                       - cognito-idp:RespondToAuthChallenge
                     Resource: arn:aws:cognito-idp:us-east-1:893303684985:userpool/us-east-1_cx21iBehL
 
+      MedManageCognitoAuthorizer:
+        Type: AWS::ApiGateway::Authorizer
+        Properties:
+          Name: MedManageCognitoAuthorizer
+          Type: COGNITO_USER_POOLS
+          IdentitySource: method.request.header.Authorization
+          ProviderARNs:
+            - arn:aws:cognito-idp:us-east-1:893303684985:userpool/us-east-1_cx21iBehL
+          RestApiId: ${ssm:med-manage-api-restApiId-${opt:stage}}
+
 plugins:
   - serverless-offline
   - serverless-python-requirements
