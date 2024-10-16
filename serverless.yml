@@ -98,6 +98,7 @@ functions:
     name: login-lambda-post-${opt:stage}
     package:
       patterns:
+        - src/employees.py
         - src/authorization.py
         - src/login_handler_post.py
     handler: src/login_handler_post.handler
