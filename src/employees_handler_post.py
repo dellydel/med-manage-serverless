@@ -1,18 +1,16 @@
 import json
-import jwt
 from src.authorization import signup_new_user
 from src.http_response import create_response
+from src.utils.token import get_token_from_event
 
 def handler(event, _):
-    headers = event['headers']
-    token = headers.get("Authorization")
+    token = get_token_from_event(event)
     if not token:
         return create_response(401, "Unauthorized")
-    decodedToken = jwt.decode(token, algorithms=["RS256"], options={"verify_signature": False})
-    organizationId = decodedToken.get("custom:organizationId")
+    organizationId = token.get("custom:organizationId")
 
     body = json.loads(event['body'])
     email = body.get('email')
-    user_type = body.get('user_type')
-    full_name = body.get('full_name')
+    user_type = body.get('userType')
+    full_name = body.get('fullName')
     return signup_new_user(full_name, email, organizationId, user_type)

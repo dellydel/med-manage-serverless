@@ -48,6 +48,7 @@ functions:
     name: employees-lambda-get-${opt:stage}
     package:
       patterns:
+        - src/utils/token.py
         - src/employees.py
         - src/employees_handler_get.py
     handler: src/employees_handler_get.handler
@@ -114,16 +115,16 @@ functions:
           method: post
           cors: true
 
-  new-user-post:
-    name: new-user-lambda-post-${opt:stage}
+  employees-post:
+    name: employees-lambda-post-${opt:stage}
     package:
       patterns:
         - src/authorization.py
-        - src/new_user_handler_post.py
-    handler: src/new_user_handler_post.handler
+        - src/employees_handler_post.py
+    handler: src/employees_handler_post.handler
     events:
       - http:
-          path: /new-user
+          path: /employees
           method: post
           cors: true
           authorizer:
