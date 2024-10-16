@@ -31,9 +31,12 @@ functions:
     name: patients-lambda-get-${opt:stage}
     package:
       patterns:
+        - src/utils/token.py
         - src/patients.py
         - src/patients_handler_get.py
     handler: src/patients_handler_get.handler
+    layers:
+      - !Ref PythonRequirementsLambdaLayer
     events:
       - http:
           path: /patients
@@ -52,6 +55,8 @@ functions:
         - src/employees.py
         - src/employees_handler_get.py
     handler: src/employees_handler_get.handler
+    layers:
+      - !Ref PythonRequirementsLambdaLayer
     events:
       - http:
           path: /employees
@@ -119,9 +124,13 @@ functions:
     name: employees-lambda-post-${opt:stage}
     package:
       patterns:
+        - src/utils/token.py
+        - src/employees.py
         - src/authorization.py
         - src/employees_handler_post.py
     handler: src/employees_handler_post.handler
+    layers:
+      - !Ref PythonRequirementsLambdaLayer
     events:
       - http:
           path: /employees
