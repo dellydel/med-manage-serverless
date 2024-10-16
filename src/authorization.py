@@ -4,12 +4,12 @@ import uuid
 import json 
 from botocore.exceptions import ClientError
 from src.http_response import create_response
+from src.employees import save_employee_to_db
 
 cognito_client = boto3.client('cognito-idp')
 user_pool_id = os.environ.get('USER_POOL_ID')
 client_id = os.environ.get('COGNITO_CLIENT_ID')
 dynamodb = boto3.resource('dynamodb')
-
 
 def create_cognito_group(org_id, org_name):
     cognito_client.create_group(
@@ -71,6 +71,8 @@ def signup_new_user(full_name, email, org_id, user_type):
             GroupName=org_id,
             Username=username
         )
+
+        save_employee_to_db(email, org_id, user_type, full_name)
 
         return {
             'statusCode': 200,
@@ -137,13 +139,3 @@ def update_user_password(email, new_password, session):
         })
     else:
         create_response(401, "Failed to authenticate after new password update.")
-
-def save_user_to_db(email, org_id, employee_type, full_name):
-    table = dynamodb.Table(os.environ.get('EMPLOYEES_TABLE'))
-    table.put_item(Item={
-        'employeeId' : str(uuid.uuid4()),
-        'email': email,
-        'org_id': org_id,
-        'employee_type': employee_type,
-        'full_name': full_name
-    })

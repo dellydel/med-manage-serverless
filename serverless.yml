@@ -78,6 +78,8 @@ functions:
     package:
       patterns:
         - src/organizations.py
+        - src/authorization.py
+        - src/employees.py
         - src/organizations_handler_post.py
     handler: src/organizations_handler_post.handler
     events:

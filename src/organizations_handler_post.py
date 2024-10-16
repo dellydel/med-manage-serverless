@@ -2,8 +2,9 @@ import uuid
 from datetime import datetime, timezone
 import json
 from src.organizations import create_organization
-from src.authorization import create_cognito_group, create_admin_user, save_user_to_db
+from src.authorization import create_cognito_group, create_admin_user
 from src.http_response import create_response
+from src.employees import save_employee_to_db
 
 def handler(event, _):
     body = json.loads(event['body'])
@@ -30,7 +31,7 @@ def handler(event, _):
         create_organization(organization)
         create_cognito_group(org_id, org_name)
         create_admin_user(email, org_id)
-        save_user_to_db(email, org_id, "admin", admin_name)
+        save_employee_to_db(email, org_id, "admin", admin_name)
         return create_response(200, f"Organization: '{org_name}' created successfully. Admin: {email}")
     except Exception as e:
         return create_response(500, f'Error creating organization: {e}')
