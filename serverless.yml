@@ -47,6 +47,26 @@ functions:
             authorizerId:
               Ref: MedManageCognitoAuthorizer
 
+  patients-post:
+    name: patients-lambda-post-${opt:stage}
+    package:
+      patterns:
+        - src/utils/token.py
+        - src/patients.py
+        - src/patients_handler_post.py
+    handler: src/patients_handler_post.handler
+    layers:
+      - !Ref PythonRequirementsLambdaLayer
+    events:
+      - http:
+          path: /patients
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: MedManageCognitoAuthorizer
+
   employees-get:
     name: employees-lambda-get-${opt:stage}
     package:

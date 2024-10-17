@@ -1,7 +1,7 @@
 import json
-from src.authorization import signup_new_user
 from src.http_response import create_response
 from src.utils.token import get_token_from_event
+from src.patients import save_patient_to_db
 
 def handler(event, _):
     token = get_token_from_event(event)
@@ -11,7 +11,6 @@ def handler(event, _):
 
     body = json.loads(event['body'])
     email = body.get('email')
-    user_type = body.get('userType')
     full_name = body.get('fullName')
-    
-    return signup_new_user(full_name, email, organizationId, user_type)
+
+    return save_patient_to_db(email, full_name, organizationId)
