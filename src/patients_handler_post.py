@@ -13,4 +13,8 @@ def handler(event, _):
     email = body.get('email')
     full_name = body.get('fullName')
 
-    return save_patient_to_db(email, full_name, organizationId)
+    save_patient_to_db(email, full_name, organizationId)
+    return {
+        'statusCode': 200,
+        'body': json.dumps({'message': 'User created successfully'})
+    }
