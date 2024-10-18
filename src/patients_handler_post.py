@@ -10,11 +10,9 @@ def handler(event, _):
     organizationId = token.get("custom:organizationId")
 
     body = json.loads(event['body'])
-    email = body.get('email')
-    full_name = body.get('fullName')
+    save_patient_to_db(body, organizationId)
 
-    save_patient_to_db(email, full_name, organizationId)
     return {
         'statusCode': 200,
-        'body': json.dumps({'message': 'User created successfully'})
+        'body': json.dumps({'message': 'Patient record created successfully.'})
     }

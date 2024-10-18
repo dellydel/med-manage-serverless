@@ -61,6 +61,10 @@ def signup_new_user(full_name, email, org_id, user_type):
             Username=username,
             UserAttributes=[
                 {'Name': 'email', 'Value': email},
+                {
+                    'Name': 'custom:organizationId',
+                    'Value': org_id, 
+                },
             ],
             TemporaryPassword='TemporaryPassword123!',
             MessageAction='SUPPRESS'

@@ -7,13 +7,19 @@ from src.http_response import create_response
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ.get('EMPLOYEES_TABLE'))
 
-def get_all_employees(organization_id):
+def get_all_employees(organization_id, type):
+    filterExpression = 'organizationId = :orgId'
+    expressionAttributeValues={
+        ':orgId': organization_id
+    }
+    
+    if type is not None:
+        filterExpression += ' AND employeeType = :type'
+        expressionAttributeValues[':type'] = type.capitalize()
     try:
         response = table.scan(
-            FilterExpression='organizationId = :orgId',
-            ExpressionAttributeValues={
-              ':orgId': organization_id
-            }
+            FilterExpression=filterExpression,
+            ExpressionAttributeValues=expressionAttributeValues
         )
         if 'Items' in response:
             return create_response(200, response['Items'])

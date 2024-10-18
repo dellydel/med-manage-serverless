@@ -132,6 +132,7 @@ functions:
     name: update-password-lambda-post-${opt:stage}
     package:
       patterns:
+        - src/employees.py
         - src/authorization.py
         - src/update_password_handler_post.py
     handler: src/update_password_handler_post.handler
