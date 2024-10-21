@@ -8,9 +8,10 @@ dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ.get('EMPLOYEES_TABLE'))
 
 def get_all_employees(organization_id, type):
-    filterExpression = 'organizationId = :orgId'
+    filterExpression = 'organizationId = :orgId AND active = :true'
     expressionAttributeValues={
-        ':orgId': organization_id
+        ':orgId': organization_id,
+        ':true': True
     }
     
     if type is not None:
@@ -37,3 +38,40 @@ def save_employee_to_db(email, org_id, employee_type, full_name):
         'employeeType': employee_type,
         'fullName': full_name
     })
+
+def update_employee_in_db(employee_id, body):
+    email = body.get('email')
+    employee_type = body.get('employeeType')
+    full_name = body.get('fullName')
+
+    table.update_item(
+        Key={
+            'employeeId': employee_id
+        },
+        UpdateExpression="set #fullName = :full_name, #employeeType = :employee_type, #email = :email",
+        ExpressionAttributeNames={
+            '#email': 'email',
+            '#fullName': 'fullName',
+            '#employeeType': 'employeeType',
+        },
+        ExpressionAttributeValues={
+            ':full_name': full_name,
+            ':employee_type': employee_type,
+            ':email': email,
+            },
+    )
+
+def soft_delete_employee_in_db(employee_id):
+
+    table.update_item(
+        Key={
+            'employeeId': employee_id
+        },
+        UpdateExpression="set #active = :false", 
+        ExpressionAttributeNames={
+            '#active': 'active'
+        },
+        ExpressionAttributeValues={
+            ':false': False
+        }
+    )

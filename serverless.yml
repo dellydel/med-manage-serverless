@@ -67,6 +67,40 @@ functions:
             authorizerId:
               Ref: MedManageCognitoAuthorizer
 
+  patients-put:
+    name: patients-lambda-put-${opt:stage}
+    package:
+      patterns:
+        - src/patients.py
+        - src/patients_handler_put.py
+    handler: src/patients_handler_put.handler
+    events:
+      - http:
+          path: /patients
+          method: put
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: MedManageCognitoAuthorizer
+
+  patients-delete:
+    name: patients-lambda-delete-${opt:stage}
+    package:
+      patterns:
+        - src/patients.py
+        - src/patients_handler_delete.py
+    handler: src/patients_handler_delete.handler
+    events:
+      - http:
+          path: /patients/{patientId}
+          method: delete
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: MedManageCognitoAuthorizer
+
   employees-get:
     name: employees-lambda-get-${opt:stage}
     package:
@@ -81,6 +115,61 @@ functions:
       - http:
           path: /employees
           method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: MedManageCognitoAuthorizer
+
+  employees-post:
+    name: employees-lambda-post-${opt:stage}
+    package:
+      patterns:
+        - src/utils/token.py
+        - src/employees.py
+        - src/authorization.py
+        - src/employees_handler_post.py
+    handler: src/employees_handler_post.handler
+    layers:
+      - !Ref PythonRequirementsLambdaLayer
+    events:
+      - http:
+          path: /employees
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: MedManageCognitoAuthorizer
+
+  employees-put:
+    name: employees-lambda-put-${opt:stage}
+    package:
+      patterns:
+        - src/employees.py
+        - src/employees_handler_put.py
+    handler: src/employees_handler_put.handler
+    events:
+      - http:
+          path: /employees
+          method: put
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: MedManageCognitoAuthorizer
+
+  employees-delete:
+    name: employees-lambda-delete-${opt:stage}
+    package:
+      patterns:
+        - src/employees.py
+        - src/employees_handler_delete.py
+    handler: src/employees_handler_delete.handler
+    events:
+      - http:
+          path: /employees/{employeeId}
+          method: delete
           cors: true
           authorizer:
             type: COGNITO_USER_POOLS
@@ -141,27 +230,6 @@ functions:
           path: /update-password
           method: post
           cors: true
-
-  employees-post:
-    name: employees-lambda-post-${opt:stage}
-    package:
-      patterns:
-        - src/utils/token.py
-        - src/employees.py
-        - src/authorization.py
-        - src/employees_handler_post.py
-    handler: src/employees_handler_post.handler
-    layers:
-      - !Ref PythonRequirementsLambdaLayer
-    events:
-      - http:
-          path: /employees
-          method: post
-          cors: true
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: MedManageCognitoAuthorizer
 
 resources:
   - Resources:
