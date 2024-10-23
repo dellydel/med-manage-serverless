@@ -58,6 +58,7 @@ def save_patient_to_db(body, org_id):
         'contactZipCode': contact_zip_code,
         'contactState': contact_state,
         'organizationId': org_id,
+        'status': 'NEW',
         'active': True
     })
 

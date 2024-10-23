@@ -11,7 +11,6 @@ def handler(event, _):
         organizationId = token.get("custom:organizationId")
 
         body = json.loads(event['body'])
-        print(body)
         save_patient_to_db(body, organizationId)
         return create_response(200, "Patient record has been sucessfully created.")
     
