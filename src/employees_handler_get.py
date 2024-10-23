@@ -5,6 +5,7 @@ from botocore.exceptions import ClientError
 
 def handler(event, _):
     query_params = event['queryStringParameters']
+    active = True
     if query_params:
         type = query_params.get("type", None)
         active_param = query_params.get("active", "true")

@@ -17,4 +17,4 @@ def handler(event, _):
 
     except ClientError as e:
         error_message = e.response['Error']['Message']
-        return create_response(500, f'Unable to retrieve employees: {error_message}')
+        return create_response(500, f'Unable to update employee: {error_message}')

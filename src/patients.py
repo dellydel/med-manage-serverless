@@ -7,22 +7,18 @@ from src.http_response import create_response
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ.get('PATIENTS_TABLE'))
 
-def get_all_patients(organization_id):
-    try:
+def get_all_patients(organization_id, active):
         response = table.scan(
-            FilterExpression='organizationId = :orgId AND active = :true',
+            FilterExpression='organizationId = :orgId AND active = :active',
             ExpressionAttributeValues={
-              ':orgId': organization_id,
-               ':true': True
+                ':orgId': organization_id,
+                ':active': active
             }
         )
         if 'Items' in response:
-            return create_response(200, response['Items'])
+            return response['Items']
         else:
-            return create_response(404, "Patients not found")
-    except ClientError as e:
-        error_message = e.response['Error']['Message']
-        return create_response(500, f'Internal server error: {error_message}')
+            return None
     
 def save_patient_to_db(body, org_id):
 
@@ -62,6 +58,7 @@ def save_patient_to_db(body, org_id):
         'contactZipCode': contact_zip_code,
         'contactState': contact_state,
         'organizationId': org_id,
+        'active': True
     })
 
 def update_patient_in_db(patient_id, body):
