@@ -12,7 +12,7 @@ def handler(event, _):
 
         body = json.loads(event['body'])
         email = body.get('email')
-        user_type = body.get('userType')
+        user_type = body.get('employeeType')
         full_name = body.get('fullName')
     
         signup_new_user(full_name, email, organizationId, user_type)
