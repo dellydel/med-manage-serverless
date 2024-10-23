@@ -1,9 +1,8 @@
 import boto3
 import os
 import uuid
-import json 
 from botocore.exceptions import ClientError
-from src.http_response import create_response, create_response_set_cookies
+from src.http_response import create_response
 from src.employees import save_employee_to_db
 
 cognito_client = boto3.client('cognito-idp')
@@ -98,17 +97,18 @@ def login_user(email, password):
            return create_response(200, {"session": response['Session'], "message": "Password Update Required."})
 
         else:
-            if 'accessToken' in response['AuthenticationResult']:
+            if 'AccessToken' in response['AuthenticationResult']:
                 authentication_result = response['AuthenticationResult']
                 access_token = authentication_result['AccessToken']
                 id_token = authentication_result['IdToken']
                 refresh_token = authentication_result['RefreshToken']
                 
-                return create_response_set_cookies(
-                    access_token,
-                    id_token,
-                    refresh_token
-               )
+                return create_response(200, "Login was successful.", headers={
+                    'Set-Cookie': f'access_token={access_token}; HttpOnly; Secure; Path=/',
+                    'Set-Cookie': f'id_token={id_token}; HttpOnly; Secure; Path=/',
+                    'Set-Cookie': f'refresh_token={refresh_token}; HttpOnly; Secure; Path=/'
+                })
+            else: create_response(401, "Failed to authenticate.")
     
     except cognito_client.exceptions.NotAuthorizedException:
         # TODO: need to return appropriate response (invalid email, or email not confirmed)
@@ -132,10 +132,11 @@ def update_user_password(email, new_password, session):
         id_token = challenge_response['AuthenticationResult']['IdToken']
         refresh_token = challenge_response['AuthenticationResult']['RefreshToken']
         
-        return create_response_set_cookies(
-            access_token,
-            id_token,
-            refresh_token
-        )
+        return create_response(200, "Login was successful.", headers={
+            'Set-Cookie': f'access_token={access_token}; HttpOnly; Secure; Path=/',
+            'Set-Cookie': f'id_token={id_token}; HttpOnly; Secure; Path=/',
+            'Set-Cookie': f'refresh_token={refresh_token}; HttpOnly; Secure; Path=/'
+        })
+
     else:
         create_response(401, "Failed to authenticate after new password update.")
