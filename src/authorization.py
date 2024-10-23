@@ -3,7 +3,7 @@ import os
 import uuid
 import json 
 from botocore.exceptions import ClientError
-from src.http_response import create_response
+from src.http_response import create_response, create_response_set_cookies
 from src.employees import save_employee_to_db
 
 cognito_client = boto3.client('cognito-idp')
@@ -104,16 +104,11 @@ def login_user(email, password):
                 id_token = authentication_result['IdToken']
                 refresh_token = authentication_result['RefreshToken']
                 
-                return create_response(200, {
-                    'accessToken': access_token,
-                    'idToken': id_token,
-                    'refreshToken': refresh_token,
-                }, 
-                headers={
-                    'Set-Cookie': f'access_token={access_token}; HttpOnly; Secure; Path=/',
-                    'Set-Cookie': f'id_token={id_token}; HttpOnly; Secure; Path=/',
-                    'Set-Cookie': f'refresh_token={refresh_token}; HttpOnly; Secure; Path=/'
-                })
+                return create_response_set_cookies(
+                    access_token,
+                    id_token,
+                    refresh_token
+               )
     
     except cognito_client.exceptions.NotAuthorizedException:
         # TODO: need to return appropriate response (invalid email, or email not confirmed)
