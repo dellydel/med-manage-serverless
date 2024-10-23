@@ -132,10 +132,10 @@ def update_user_password(email, new_password, session):
         id_token = challenge_response['AuthenticationResult']['IdToken']
         refresh_token = challenge_response['AuthenticationResult']['RefreshToken']
         
-        return create_response(200, {
-                'accessToken': access_token,
-                'idToken': id_token,
-                'refreshToken': refresh_token
-        })
+        return create_response_set_cookies(
+            access_token,
+            id_token,
+            refresh_token
+        )
     else:
         create_response(401, "Failed to authenticate after new password update.")
