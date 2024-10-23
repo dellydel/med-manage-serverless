@@ -98,15 +98,22 @@ def login_user(email, password):
            return create_response(200, {"session": response['Session'], "message": "Password Update Required."})
 
         else:
-            authentication_result = response['AuthenticationResult']
-            access_token = authentication_result['AccessToken']
-            id_token = authentication_result['IdToken']
-            refresh_token = authentication_result['RefreshToken']
-            return create_response(200, {
-                'accessToken': access_token,
-                'idToken': id_token,
-                'refreshToken': refresh_token,
-            })
+            if 'accessToken' in response['AuthenticationResult']:
+                authentication_result = response['AuthenticationResult']
+                access_token = authentication_result['AccessToken']
+                id_token = authentication_result['IdToken']
+                refresh_token = authentication_result['RefreshToken']
+                
+                return create_response(200, {
+                    'accessToken': access_token,
+                    'idToken': id_token,
+                    'refreshToken': refresh_token,
+                }, 
+                headers={
+                    'Set-Cookie': f'access_token={access_token}; HttpOnly; Secure; Path=/',
+                    'Set-Cookie': f'id_token={id_token}; HttpOnly; Secure; Path=/',
+                    'Set-Cookie': f'refresh_token={refresh_token}; HttpOnly; Secure; Path=/'
+                })
     
     except cognito_client.exceptions.NotAuthorizedException:
         # TODO: need to return appropriate response (invalid email, or email not confirmed)
