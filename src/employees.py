@@ -1,34 +1,30 @@
 import os
 import boto3
 import uuid
-from botocore.exceptions import ClientError
-from src.http_response import create_response
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ.get('EMPLOYEES_TABLE'))
 
-def get_all_employees(organization_id, type):
-    filterExpression = 'organizationId = :orgId AND active = :true'
+def get_all_employees(organization_id, type, active):
+    
+    filterExpression = 'organizationId = :orgId AND active = :active'
     expressionAttributeValues={
         ':orgId': organization_id,
-        ':true': True
+        ':active': active
     }
     
     if type is not None:
         filterExpression += ' AND employeeType = :type'
         expressionAttributeValues[':type'] = type.capitalize()
-    try:
-        response = table.scan(
-            FilterExpression=filterExpression,
-            ExpressionAttributeValues=expressionAttributeValues
-        )
-        if 'Items' in response:
-            return create_response(200, response['Items'])
-        else:
-            return create_response(404, "Employees not found")
-    except ClientError as e:
-        error_message = e.response['Error']['Message']
-        return create_response(500, f'Internal server error: {error_message}')
+
+    response = table.scan(
+        FilterExpression=filterExpression,
+        ExpressionAttributeValues=expressionAttributeValues
+    )
+    if 'Items' in response:
+        return response['Items']
+    else:
+        return None
     
 def save_employee_to_db(email, org_id, employee_type, full_name):
     table.put_item(Item={
@@ -36,7 +32,8 @@ def save_employee_to_db(email, org_id, employee_type, full_name):
         'email': email,
         'organizationId': org_id,
         'employeeType': employee_type,
-        'fullName': full_name
+        'fullName': full_name,
+        'active': True
     })
 
 def update_employee_in_db(employee_id, body):
@@ -60,9 +57,8 @@ def update_employee_in_db(employee_id, body):
             ':email': email,
             },
     )
-
+    
 def soft_delete_employee_in_db(employee_id):
-
     table.update_item(
         Key={
             'employeeId': employee_id

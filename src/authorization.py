@@ -77,17 +77,11 @@ def signup_new_user(full_name, email, org_id, user_type):
         )
 
         save_employee_to_db(email, org_id, user_type, full_name)
-
-        return {
-            'statusCode': 200,
-            'body': json.dumps({'message': 'User created successfully'})
-        }
+        return create_response(200, "User created successfully.")
+    
     except ClientError as e:
         print(f"Error creating user: {str(e)}")
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'message': 'Failed to create user'})
-        }
+        return create_response(500, "Failed to create new user.")
 
 def login_user(email, password):
     try:
