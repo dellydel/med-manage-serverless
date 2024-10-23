@@ -103,11 +103,13 @@ def login_user(email, password):
                 id_token = authentication_result['IdToken']
                 refresh_token = authentication_result['RefreshToken']
                 
-                return create_response(200, "Login was successful.", headers={
-                    'Set-Cookie': f'access_token={access_token}; HttpOnly; Secure; Path=/',
-                    'Set-Cookie': f'id_token={id_token}; HttpOnly; Secure; Path=/',
-                    'Set-Cookie': f'refresh_token={refresh_token}; HttpOnly; Secure; Path=/'
-                })
+                cookies= [
+                    f'access_token={access_token} ',
+                    f'id_token={id_token}; HttpOnly; Secure; Path=/',
+                    f'refresh_token={refresh_token}; HttpOnly; Secure; Path=/'
+                ]
+                
+                return create_response(200, "Login was successful.", cookies)
             else: create_response(401, "Failed to authenticate.")
     
     except cognito_client.exceptions.NotAuthorizedException:
