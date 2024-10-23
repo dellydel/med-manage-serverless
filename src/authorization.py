@@ -82,7 +82,7 @@ def signup_new_user(full_name, email, org_id, user_type):
         print(f"Error creating user: {str(e)}")
         return create_response(500, "Failed to create new user.")
 
-def login_user(email, password):
+def login_user(email, password, domain):
     try:
         response = cognito_client.initiate_auth(
             ClientId=client_id,
@@ -103,10 +103,13 @@ def login_user(email, password):
                 id_token = authentication_result['IdToken']
                 refresh_token = authentication_result['RefreshToken']
                 
+                secure = 'HttpOnly; Secure;' if domain != 'localhost:3000' else ''
+                set_domain = domain if domain != 'localhost:3000' else 'localhost'
+
                 cookies= [
-                    f'access_token={access_token} ',
-                    f'id_token={id_token}; HttpOnly; Secure; Path=/',
-                    f'refresh_token={refresh_token}; HttpOnly; Secure; Path=/'
+                    f'access_token={access_token}; {secure} Path=/; Domain={set_domain}',
+                    f'id_token={id_token}; {secure} Path=/; Domain={set_domain}',
+                    f'refresh_token={refresh_token}; {secure} Path=/; Domain={set_domain}'
                 ]
                 
                 return create_response(200, "Login was successful.", cookies)
@@ -118,7 +121,8 @@ def login_user(email, password):
     except Exception as e:
         return create_response(500, str(e))
 
-def update_user_password(email, new_password, session):
+def update_user_password(email, new_password, session, domain):
+
     challenge_response = cognito_client.respond_to_auth_challenge(
         ClientId=client_id,
         ChallengeName='NEW_PASSWORD_REQUIRED',
@@ -134,11 +138,53 @@ def update_user_password(email, new_password, session):
         id_token = challenge_response['AuthenticationResult']['IdToken']
         refresh_token = challenge_response['AuthenticationResult']['RefreshToken']
         
-        return create_response(200, "Login was successful.", headers={
-            'Set-Cookie': f'access_token={access_token}; HttpOnly; Secure; Path=/',
-            'Set-Cookie': f'id_token={id_token}; HttpOnly; Secure; Path=/',
-            'Set-Cookie': f'refresh_token={refresh_token}; HttpOnly; Secure; Path=/'
-        })
+        secure = 'HttpOnly; Secure;' if domain != 'localhost:3000' else ''
+        set_domain = domain if domain != 'localhost:3000' else 'localhost'
+
+        cookies= [
+            f'access_token={access_token}; {secure} Path=/; Domain={set_domain}',
+            f'id_token={id_token}; {secure} Path=/; Domain={set_domain}',
+            f'refresh_token={refresh_token}; {secure} Path=/; Domain={set_domain}'
+        ]
+                
+        return create_response(200, "Password update was successful.", cookies)
 
     else:
         create_response(401, "Failed to authenticate after new password update.")
+
+def refresh_token(refresh_token, domain):
+    try:
+        response = cognito_client.admin_initiate_auth(
+            UserPoolId=user_pool_id,  
+            ClientId=client_id,
+            AuthFlow='REFRESH_TOKEN_AUTH',
+            AuthParameters={
+                'REFRESH_TOKEN': refresh_token
+            }
+        )
+
+        if 'AccessToken' in response['AuthenticationResult']:
+            authentication_result = response['AuthenticationResult']
+            access_token = authentication_result['AccessToken']
+            id_token = authentication_result['IdToken']
+            
+            secure = 'HttpOnly; Secure;' if domain != 'localhost:3000' else ''
+            set_domain = domain if domain != 'localhost:3000' else 'localhost'
+
+            cookies= [
+                f'access_token={access_token}; {secure} Path=/; Domain={set_domain}',
+                f'id_token={id_token}; {secure} Path=/; Domain={set_domain}',
+                f'refresh_token={refresh_token}; {secure} Path=/; Domain={set_domain}'
+            ]
+                
+            return create_response(200, "Login was successful.", cookies)
+        
+        else: create_response(401, "Failed to authenticate.")
+
+    except cognito_client.exceptions.NotAuthorizedException:
+        return create_response(401, "Invalid refresh token or the user is not authorized.")
+    
+    except Exception as e:
+        return create_response(500, f"An error occurred: {str(e)}")
+
+       

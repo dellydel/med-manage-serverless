@@ -8,6 +8,7 @@ def create_response(status_code, body, mv_headers=None):
       "Access-Control-Allow-Headers": "Content-Type, Set-Cookie",
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "OPTIONS,POST,GET,DELETE",
+      "Access-Control-Allow-Credentials": "true"
     },
     "body": body if isinstance(body, str) else json.dumps(body)
   }

@@ -231,6 +231,19 @@ functions:
           method: post
           cors: true
 
+  refresh-token-post:
+    name: refresh-token-lambda-post-${opt:stage}
+    package:
+      patterns:
+        - src/authorization.py
+        - src/refresh_token_handler_post.py
+    handler: src/refresh_token_handler_post.handler
+    events:
+      - http:
+          path: /refresh-token
+          method: post
+          cors: true
+
 resources:
   - Resources:
       IAMServerlessRoleMedManage:

@@ -5,10 +5,12 @@ from src.authorization import login_user
 
 def handler(event, _):
     body = json.loads(event['body'])
+    domain = event['headers'].get('Host', 'localhost')
+
     email = body.get('email')
     password = body.get('password')
 
     if not email or not password:
         return create_response(400, 'Missing email or password')
     
-    return login_user(email, password)
+    return login_user(email, password, domain)
