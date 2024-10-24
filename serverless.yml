@@ -235,6 +235,7 @@ functions:
     name: refresh-token-lambda-post-${opt:stage}
     package:
       patterns:
+        - src/employees.py
         - src/authorization.py
         - src/refresh_token_handler_post.py
     handler: src/refresh_token_handler_post.handler
