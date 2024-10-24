@@ -6,7 +6,6 @@ from botocore.exceptions import ClientError
 
 def handler(event, _):
     try:
-
         token = get_token_from_event(event)
         organizationId = token.get("custom:organizationId")
 

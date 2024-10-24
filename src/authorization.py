@@ -82,7 +82,7 @@ def signup_new_user(full_name, email, org_id, user_type):
         print(f"Error creating user: {str(e)}")
         return create_response(500, "Failed to create new user.")
 
-def login_user(email, password, domain):
+def login_user(email, password):
     try:
         response = cognito_client.initiate_auth(
             ClientId=client_id,
@@ -103,16 +103,11 @@ def login_user(email, password, domain):
                 id_token = authentication_result['IdToken']
                 refresh_token = authentication_result['RefreshToken']
                 
-                secure = 'HttpOnly; Secure;' if domain != 'localhost:3000' else ''
-                set_domain = domain if domain != 'localhost:3000' else 'localhost'
-
-                cookies= [
-                    f'access_token={access_token}; {secure} Path=/; Domain={set_domain}',
-                    f'id_token={id_token}; {secure} Path=/; Domain={set_domain}',
-                    f'refresh_token={refresh_token}; {secure} Path=/; Domain={set_domain}'
-                ]
-                
-                return create_response(200, "Login was successful.", cookies)
+                return create_response(200, {
+                'accessToken': access_token,
+                'idToken': id_token,
+                'refreshToken': refresh_token,
+                })
             else: create_response(401, "Failed to authenticate.")
     
     except cognito_client.exceptions.NotAuthorizedException:
@@ -121,7 +116,7 @@ def login_user(email, password, domain):
     except Exception as e:
         return create_response(500, str(e))
 
-def update_user_password(email, new_password, session, domain):
+def update_user_password(email, new_password, session):
 
     challenge_response = cognito_client.respond_to_auth_challenge(
         ClientId=client_id,
@@ -138,21 +133,16 @@ def update_user_password(email, new_password, session, domain):
         id_token = challenge_response['AuthenticationResult']['IdToken']
         refresh_token = challenge_response['AuthenticationResult']['RefreshToken']
         
-        secure = 'HttpOnly; Secure;' if domain != 'localhost:3000' else ''
-        set_domain = domain if domain != 'localhost:3000' else 'localhost'
-
-        cookies= [
-            f'access_token={access_token}; {secure} Path=/; Domain={set_domain}',
-            f'id_token={id_token}; {secure} Path=/; Domain={set_domain}',
-            f'refresh_token={refresh_token}; {secure} Path=/; Domain={set_domain}'
-        ]
-                
-        return create_response(200, "Password update was successful.", cookies)
+        return create_response(200, {
+                'accessToken': access_token,
+                'idToken': id_token,
+                'refreshToken': refresh_token
+        })
 
     else:
         create_response(401, "Failed to authenticate after new password update.")
 
-def refresh_token(refresh_token, domain):
+def refresh_token(refresh_token):
     try:
         response = cognito_client.admin_initiate_auth(
             UserPoolId=user_pool_id,  
@@ -168,16 +158,11 @@ def refresh_token(refresh_token, domain):
             access_token = authentication_result['AccessToken']
             id_token = authentication_result['IdToken']
             
-            secure = 'HttpOnly; Secure;' if domain != 'localhost:3000' else ''
-            set_domain = domain if domain != 'localhost:3000' else 'localhost'
-
-            cookies= [
-                f'access_token={access_token}; {secure} Path=/; Domain={set_domain}',
-                f'id_token={id_token}; {secure} Path=/; Domain={set_domain}',
-                f'refresh_token={refresh_token}; {secure} Path=/; Domain={set_domain}'
-            ]
-                
-            return create_response(200, "Login was successful.", cookies)
+            return create_response(200, {
+                'accessToken': access_token,
+                'idToken': id_token,
+                'refreshToken': refresh_token
+            })
         
         else: create_response(401, "Failed to authenticate.")
 
