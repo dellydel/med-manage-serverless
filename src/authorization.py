@@ -55,11 +55,16 @@ def signup_new_user(full_name, email, org_id, user_type):
     username = str(uuid.uuid4())
     
     try:
+        # TODO: remove the email verified for prod
         cognito_client.admin_create_user(
             UserPoolId=user_pool_id,
             Username=username,
             UserAttributes=[
                 {'Name': 'email', 'Value': email},
+                {
+                    'Name': 'email_verified',
+                    'Value': 'true',
+                },
                 {
                     'Name': 'custom:organizationId',
                     'Value': org_id, 

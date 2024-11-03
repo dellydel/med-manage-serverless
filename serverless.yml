@@ -245,6 +245,43 @@ functions:
           method: post
           cors: true
 
+  assignments-post:
+    name: assignments-lambda-post-${opt:stage}
+    package:
+      patterns:
+        - src/utils/token.py
+        - src/assignments.py
+        - src/assignments_handler_post.py
+    handler: src/assignments_handler_post.handler
+    layers:
+      - !Ref PythonRequirementsLambdaLayer
+    events:
+      - http:
+          path: /assignments
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: MedManageCognitoAuthorizer
+
+  assignments-put:
+    name: assignments-lambda-put-${opt:stage}
+    package:
+      patterns:
+        - src/assignments.py
+        - src/assignments_handler_put.py
+    handler: src/assignments_handler_put.handler
+    events:
+      - http:
+          path: /assignments
+          method: put
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: MedManageCognitoAuthorizer
+
 resources:
   - Resources:
       IAMServerlessRoleMedManage:
