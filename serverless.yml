@@ -11,6 +11,7 @@ provider:
     restApiRootResourceId: ${ssm:med-manage-api-restApiRootResourceId-${opt:stage}}
   iam:
     role: IAMServerlessRoleMedManage
+
 custom:
   stage: ${opt:stage}
   pythonRequirements:
@@ -228,6 +229,19 @@ functions:
     events:
       - http:
           path: /update-password
+          method: post
+          cors: true
+
+  forgot-password-post:
+    name: forgot-password-lambda-post-${opt:stage}
+    package:
+      patterns:
+        - src/authorization.py
+        - src/forgot_password_handler_post.py
+    handler: src/forgot_password_handler_post.handler
+    events:
+      - http:
+          path: /forgot-password
           method: post
           cors: true
 

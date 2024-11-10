@@ -177,4 +177,17 @@ def refresh_token(refresh_token):
     except Exception as e:
         return create_response(500, f"An error occurred: {str(e)}")
 
-       
+def forgot_password(email):
+    try:
+        cognito_client.forgot_password(
+            ClientId=client_id,
+            Username=email
+        )
+
+        return create_response(200, "Password reset email sent successfully.")
+
+    except cognito_client.exceptions.UserNotFoundException:
+        return create_response(404, "User not found.")
+
+    except Exception as e:
+        return create_response(500, f"An error occurred: {str(e)}")      
