@@ -179,12 +179,12 @@ def refresh_token(refresh_token):
 
 def forgot_password(email):
     try:
-        cognito_client.forgot_password(
+        response = cognito_client.forgot_password(
             ClientId=client_id,
             Username=email
         )
-
-        return create_response(200, "Password reset email sent successfully.")
+        details = response.get("CodeDeliveryDetails")
+        return create_response(200, f"Password reset email sent to {details.get("Destination")}.")
 
     except cognito_client.exceptions.UserNotFoundException:
         return create_response(404, "User not found.")
