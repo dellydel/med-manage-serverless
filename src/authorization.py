@@ -184,10 +184,29 @@ def forgot_password(email):
             Username=email
         )
         details = response.get("CodeDeliveryDetails")
-        return create_response(200, f"Password reset email sent to {details.get("Destination")}.")
+        return create_response(200, f"Password reset email sent to {details.get('Destination')}.")
 
     except cognito_client.exceptions.UserNotFoundException:
         return create_response(404, "User not found.")
 
     except Exception as e:
         return create_response(500, f"An error occurred: {str(e)}")      
+    
+def confirm_forgot_password(email, password, confirmation_code):
+    try:
+        cognito_client.confirm_forgot_password(
+            ClientId=client_id,
+            Username=email,
+            ConfirmationCode=confirmation_code,
+            Password=password
+        )
+        return create_response(200, "Password reset successfully.")
+
+    except cognito_client.exceptions.CodeMismatchException:
+        return create_response(400, "Invalid verification code provided, please request a code again.")
+
+    except cognito_client.exceptions.ExpiredCodeException:
+        return create_response(400, "Invalid code provided, please request a code again.")
+
+    except Exception as e:
+        return create_response(500, f"An error occurred: {str(e)}") 
