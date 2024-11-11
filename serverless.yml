@@ -236,6 +236,7 @@ functions:
     name: forgot-password-lambda-post-${opt:stage}
     package:
       patterns:
+        - src/employees.py
         - src/authorization.py
         - src/forgot_password_handler_post.py
     handler: src/forgot_password_handler_post.handler
