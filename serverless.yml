@@ -246,6 +246,20 @@ functions:
           method: post
           cors: true
 
+  change-password-post:
+    name: change-password-lambda-post-${opt:stage}
+    package:
+      patterns:
+        - src/employees.py
+        - src/authorization.py
+        - src/change_password_handler_post.py
+    handler: src/change_password_handler_post.handler
+    events:
+      - http:
+          path: /change-password
+          method: post
+          cors: true
+
   refresh-token-post:
     name: refresh-token-lambda-post-${opt:stage}
     package:
