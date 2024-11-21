@@ -346,6 +346,7 @@ resources:
                       - arn:aws:dynamodb:us-east-1:893303684985:table/organizations-${opt:stage}
                       - arn:aws:dynamodb:us-east-1:893303684985:table/employees-${opt:stage}
                       - arn:aws:dynamodb:us-east-1:893303684985:table/patients-${opt:stage}
+                      - arn:aws:dynamodb:us-east-1:893303684985:table/assignments-${opt:stage}
 
                   - Effect: Allow
                     Action:
