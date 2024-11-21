@@ -1,4 +1,5 @@
 from src.patients import get_all_patients
+from src.assignments import get_assignment 
 from src.utils.token import get_token_from_event
 from src.http_response import create_response
 from botocore.exceptions import ClientError
@@ -15,6 +16,10 @@ def handler(event, _):
         patients =  get_all_patients(organization_id, active)
         
         if patients is not None:
+            for patient in patients:
+                patient_id = patient.get('patientId')
+                assignment = get_assignment(patient_id)
+                patient["clinicianAssigned"] = assignment.get("employee_id")
             return create_response(200, patients)
         else:
             return create_response(404, "No patients found.")

@@ -53,6 +53,7 @@ functions:
     package:
       patterns:
         - src/utils/token.py
+        - src/assignments.py
         - src/patients.py
         - src/patients_handler_post.py
     handler: src/patients_handler_post.handler
