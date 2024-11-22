@@ -21,7 +21,7 @@ def handler(event, _):
                 patient_id = patient.get('patientId')
                 assignments = get_assignment(patient_id)
                 if assignments and len(assignments) > 0:
-                    employee = get_employee_by_id(organization_id, assignments[0].get("employeeId"))
+                    employee = get_employee_by_id(assignments[0].get("employeeId"))
                     patient["clinicianAssigned"] = employee.get("fullName")
                 else:
                     patient["clinicianAssigned"] = None
