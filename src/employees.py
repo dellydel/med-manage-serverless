@@ -5,6 +5,22 @@ import uuid
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ.get('EMPLOYEES_TABLE'))
 
+def get_employee_by_id(organization_id, employee_id):
+    filterExpression = 'organizationId = :orgId'
+    expressionAttributeValues={
+        ':orgId': organization_id
+    }
+
+    response = table.get_item(
+        Key={'employeeId': employee_id},
+        FilterExpression=filterExpression,
+        ExpressionAttributeValues=expressionAttributeValues)
+    
+    if 'Item' in response:
+        return response['Item']
+    else:
+        return None
+
 def get_all_employees(organization_id, type, active):
     
     filterExpression = 'organizationId = :orgId AND active = :active'

@@ -1,4 +1,5 @@
 from src.patients import get_all_patients
+from src.employees import get_employee_by_id
 from src.assignments import get_assignment 
 from src.utils.token import get_token_from_event
 from src.http_response import create_response
@@ -18,8 +19,12 @@ def handler(event, _):
         if patients is not None:
             for patient in patients:
                 patient_id = patient.get('patientId')
-                assignment = get_assignment(patient_id)
-                patient["clinicianAssigned"] = assignment.get("employee_id")
+                assignments = get_assignment(patient_id)
+                if assignments and len(assignments) > 0:
+                    employee = get_employee_by_id(organization_id, assignments[0].get("employeeId"))
+                    patient["clinicianAssigned"] = employee.get("fullName")
+                else:
+                    patient["clinicianAssigned"] = None
             return create_response(200, patients)
         else:
             return create_response(404, "No patients found.")

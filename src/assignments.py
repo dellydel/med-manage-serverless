@@ -6,7 +6,7 @@ dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ.get('ASSIGNMENTS_TABLE'))
 
 def get_assignment(patient_id):
-    filterExpression = 'organizationId = :orgId'
+    filterExpression = 'patientId = :patientId'
     expressionAttributeValues={
         ':patientId': patient_id,
     }
