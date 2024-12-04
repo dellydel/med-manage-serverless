@@ -149,8 +149,7 @@ def update_user_password(email, new_password, session):
 
 def refresh_token(refresh_token):
     try:
-        response = cognito_client.admin_initiate_auth(
-            UserPoolId=user_pool_id,  
+        response = cognito_client.initiate_auth(
             ClientId=client_id,
             AuthFlow='REFRESH_TOKEN_AUTH',
             AuthParameters={

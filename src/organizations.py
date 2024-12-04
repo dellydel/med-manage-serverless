@@ -15,6 +15,7 @@ def get_organization(org_id):
         else:
             return create_response(404, "Organization not found")
     except ClientError as e:
+        # TODO: Need to handle email already exists error
         error_message = e.response['Error']['Message']
         return create_response(500, f'Internal server error: {error_message}')
 
