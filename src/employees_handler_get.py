@@ -1,4 +1,4 @@
-from src.employees import get_all_employees, get_employee
+from src.employees import get_all_employees, get_employee_by_id
 from src.utils.token import get_token_from_event
 from src.http_response import create_response
 from botocore.exceptions import ClientError
@@ -16,7 +16,7 @@ def handler(event, _):
         employee_id = query_params.get("employeeId", None)
     try:
         if employee_id is not None:
-            employee = get_employee(organization_id, employee_id)
+            employee = get_employee_by_id(employee_id)
             if employee is not None:
                 return create_response(200, employee)
             else:
