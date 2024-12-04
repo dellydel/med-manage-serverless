@@ -4,17 +4,18 @@ from src.http_response import create_response
 from botocore.exceptions import ClientError
 
 def handler(event, _):
-    token = get_token_from_event(event)
-    organization_id = token.get("custom:organizationId")
-    query_params = event['queryStringParameters']
-    active = True
-    type = None
-    if query_params:
-        type = query_params.get("type", None)
-        active_param = query_params.get("active", "true")
-        active = active_param.lower() in ('true', '1') 
-        employee_id = query_params.get("employeeId", None)
     try:
+        token = get_token_from_event(event)
+        organization_id = token.get("custom:organizationId")
+        query_params = event['queryStringParameters']
+        active = True
+        type = None
+        employee_id = None
+        if query_params:
+            type = query_params.get("type", None)
+            active_param = query_params.get("active", "true")
+            active = active_param.lower() in ('true', '1') 
+            employee_id = query_params.get("employeeId", None)
         if employee_id is not None:
             employee = get_employee_by_id(employee_id)
             if employee is not None:
@@ -26,10 +27,6 @@ def handler(event, _):
             return create_response(200, employees)
         else:
             return create_response(404, "No employees found.")
-        
-    except KeyError as e:
-        error_message = str(e)
-        return create_response(500, f'You are not authorized to complete this action: {error_message}')
     
     except ClientError as e:
         error_message = e.response['Error']['Message']
