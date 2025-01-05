@@ -16,7 +16,9 @@ def handler(event, _):
         organization_id = token.get("custom:organizationId")
         patients =  get_all_patients(organization_id, active)
         
-        if patients is not None:
+        if not patients:
+            return create_error_response(404, "No patients found.")
+        else:
             for patient in patients:
                 patient_id = patient.get('patientId')
                 assignments = get_assignment(patient_id)
@@ -26,8 +28,6 @@ def handler(event, _):
                 else:
                     patient["clinicianAssigned"] = None
             return create_success_response(patients)
-        else:
-            return create_error_response(404, "No patients found.")
     
     except KeyError as e:
         error_message = str(e)

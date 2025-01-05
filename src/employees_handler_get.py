@@ -18,15 +18,17 @@ def handler(event, _):
             employee_id = query_params.get("employeeId", None)
         if employee_id is not None:
             employee = get_employee_by_id(employee_id)
-            if employee is not None:
-                return create_success_response(employee)
-            else:
+            if not employee:
                 return create_error_response(404, "No employee found.")
+            else:
+                return create_success_response(employee)
+                
         employees = get_all_employees(organization_id, type, active)
-        if employees is not None:
-            return create_success_response(employees)
-        else:
+        if not employees:
             return create_error_response(404, "No employees found.")
+        else:
+            return create_success_response(employees)
+            
     
     except ClientError as e:
         error_message = e.response['Error']['Message']
