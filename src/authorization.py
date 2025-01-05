@@ -2,7 +2,7 @@ import boto3
 import os
 import uuid
 from botocore.exceptions import ClientError
-from src.http_response import create_response
+from src.http_response import create_success_response, create_error_response
 from src.employees import save_employee_to_db
 
 cognito_client = boto3.client('cognito-idp')
@@ -81,11 +81,13 @@ def signup_new_user(full_name, email, org_id, user_type):
         )
 
         save_employee_to_db(email, org_id, user_type, full_name)
-        return create_response(200, "User created successfully.")
+        return create_success_response("User created successfully.")
     
     except ClientError as e:
-        print(f"Error creating user: {str(e)}")
-        return create_response(500, "Failed to create new user.")
+        error_message = e.response['Error']['Message']
+        return create_error_response(500, f'Failed to create new user: {error_message}')
+    except Exception as e:
+        return create_error_response(500, str(e))
 
 def login_user(email, password):
     try:
@@ -99,7 +101,7 @@ def login_user(email, password):
         ) 
 
         if response.get('ChallengeName') == 'NEW_PASSWORD_REQUIRED':
-           return create_response(200, {"session": response['Session'], "message": "Password Update Required."})
+           return create_success_response({"session": response['Session'], "message": "Password Update Required."})
 
         else:
             if 'AccessToken' in response['AuthenticationResult']:
@@ -108,18 +110,18 @@ def login_user(email, password):
                 id_token = authentication_result['IdToken']
                 refresh_token = authentication_result['RefreshToken']
                 
-                return create_response(200, {
+                return create_success_response({
                 'accessToken': access_token,
                 'idToken': id_token,
                 'refreshToken': refresh_token,
                 })
-            else: create_response(401, "Failed to authenticate.")
+            else: create_error_response(401, "Failed to authenticate.")
     
     except cognito_client.exceptions.NotAuthorizedException:
         # TODO: need to return appropriate response (invalid email, or email not confirmed)
-        return create_response(401, 'Invalid email or password')
+        return create_error_response(401, 'Invalid email or password')
     except Exception as e:
-        return create_response(500, str(e))
+        return create_error_response(500, str(e))
 
 def update_user_password(email, new_password, session):
 
@@ -138,14 +140,14 @@ def update_user_password(email, new_password, session):
         id_token = challenge_response['AuthenticationResult']['IdToken']
         refresh_token = challenge_response['AuthenticationResult']['RefreshToken']
         
-        return create_response(200, {
+        return create_success_response({
                 'accessToken': access_token,
                 'idToken': id_token,
                 'refreshToken': refresh_token
         })
 
     else:
-        create_response(401, "Failed to authenticate after new password update.")
+        create_error_response(401, "Failed to authenticate after new password update.")
 
 def refresh_token(refresh_token):
     try:
@@ -162,19 +164,19 @@ def refresh_token(refresh_token):
             access_token = authentication_result['AccessToken']
             id_token = authentication_result['IdToken']
             
-            return create_response(200, {
+            return create_success_response({
                 'accessToken': access_token,
                 'idToken': id_token,
                 'refreshToken': refresh_token
             })
         
-        else: create_response(401, "Failed to authenticate.")
+        else: create_error_response(401, "Failed to authenticate.")
 
     except cognito_client.exceptions.NotAuthorizedException:
-        return create_response(401, "Invalid refresh token or the user is not authorized.")
+        return create_error_response(401, "Invalid refresh token or the user is not authorized.")
     
     except Exception as e:
-        return create_response(500, f"An error occurred: {str(e)}")
+        return create_error_response(500, str(e))
 
 def forgot_password(email):
     try:
@@ -183,13 +185,13 @@ def forgot_password(email):
             Username=email
         )
         details = response.get("CodeDeliveryDetails")
-        return create_response(200, f"Password reset email sent to {details.get('Destination')}.")
+        return create_success_response(f"Password reset email sent to {details.get('Destination')}.")
 
     except cognito_client.exceptions.UserNotFoundException:
-        return create_response(404, "User not found.")
+        return create_error_response(404, "User not found.")
 
     except Exception as e:
-        return create_response(500, f"An error occurred: {str(e)}")      
+        return create_error_response(500, str(e))      
     
 def confirm_forgot_password(email, password, confirmation_code):
     try:
@@ -199,13 +201,13 @@ def confirm_forgot_password(email, password, confirmation_code):
             ConfirmationCode=confirmation_code,
             Password=password
         )
-        return create_response(200, "Password reset successfully.")
+        return create_success_response("Password reset successfully.")
 
     except cognito_client.exceptions.CodeMismatchException:
-        return create_response(400, "Invalid verification code provided, please request a code again.")
+        return create_error_response(400, "Invalid verification code provided, please request a code again.")
 
     except cognito_client.exceptions.ExpiredCodeException:
-        return create_response(400, "Invalid code provided, please request a code again.")
+        return create_error_response(400, "Invalid code provided, please request a code again.")
 
     except Exception as e:
-        return create_response(500, f"An error occurred: {str(e)}") 
+        return create_error_response(500, str(e)) 

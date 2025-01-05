@@ -2,7 +2,7 @@ from src.patients import get_all_patients
 from src.employees import get_employee_by_id
 from src.assignments import get_assignment 
 from src.utils.token import get_token_from_event
-from src.http_response import create_response
+from src.http_response import create_success_response, create_error_response
 from botocore.exceptions import ClientError
 
 def handler(event, _):
@@ -25,14 +25,17 @@ def handler(event, _):
                     patient["clinicianAssigned"] = employee.get("fullName")
                 else:
                     patient["clinicianAssigned"] = None
-            return create_response(200, patients)
+            return create_success_response(patients)
         else:
-            return create_response(404, "No patients found.")
+            return create_error_response(404, "No patients found.")
     
     except KeyError as e:
         error_message = str(e)
-        return create_response(500, f'You are not authorized to complete this action: {error_message}')
+        return create_error_response(500, f'You are not authorized to complete this action: {error_message}')
     
     except ClientError as e:
         error_message = e.response['Error']['Message']
-        return create_response(500, f'Unable to retrieve patients: {error_message}') 
+        return create_error_response(500, f'Unable to retrieve patients: {error_message}') 
+    
+    except Exception as e:
+        return create_error_response(500, str(e))

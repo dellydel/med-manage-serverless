@@ -1,6 +1,6 @@
 from src.employees import get_all_employees, get_employee_by_id
 from src.utils.token import get_token_from_event
-from src.http_response import create_response
+from src.http_response import create_success_response, create_error_response
 from botocore.exceptions import ClientError
 
 def handler(event, _):
@@ -19,15 +19,17 @@ def handler(event, _):
         if employee_id is not None:
             employee = get_employee_by_id(employee_id)
             if employee is not None:
-                return create_response(200, employee)
+                return create_success_response(employee)
             else:
-                return create_response(404, "No employee found.")
+                return create_error_response(404, "No employee found.")
         employees = get_all_employees(organization_id, type, active)
         if employees is not None:
-            return create_response(200, employees)
+            return create_success_response(employees)
         else:
-            return create_response(404, "No employees found.")
+            return create_error_response(404, "No employees found.")
     
     except ClientError as e:
         error_message = e.response['Error']['Message']
-        return create_response(500, f'Unable to retrieve employees: {error_message}')     
+        return create_error_response(500, f'Unable to retrieve employees: {error_message}')
+    except Exception as e:
+        return create_error_response(500, str(e))     

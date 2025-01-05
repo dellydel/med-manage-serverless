@@ -2,7 +2,6 @@ import os
 import boto3
 import uuid
 from botocore.exceptions import ClientError
-from src.http_response import create_response
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ.get('PATIENTS_TABLE'))
