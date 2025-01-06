@@ -215,6 +215,8 @@ functions:
         - src/authorization.py
         - src/login_handler_post.py
     handler: src/login_handler_post.handler
+    layers:
+      - !Ref PythonRequirementsLambdaLayer
     events:
       - http:
           path: /login
@@ -272,6 +274,9 @@ functions:
         - src/authorization.py
         - src/refresh_token_handler_post.py
     handler: src/refresh_token_handler_post.handler
+    layers:
+      - !Ref PythonRequirementsLambdaLayer
+
     events:
       - http:
           path: /refresh-token
