@@ -1,6 +1,5 @@
 import os
 import boto3
-import uuid
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ.get('EMPLOYEES_TABLE'))
@@ -35,9 +34,9 @@ def get_all_employees(organization_id, type, active):
     else:
         return None
     
-def save_employee_to_db(email, org_id, employee_type, full_name):
+def save_employee_to_db(email, org_id, employee_type, full_name, username):
     table.put_item(Item={
-        'employeeId' : str(uuid.uuid4()),
+        'employeeId' : username,
         'email': email,
         'organizationId': org_id,
         'employeeType': employee_type,

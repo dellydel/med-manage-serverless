@@ -10,3 +10,7 @@ def get_token_from_event(event):
     
     except KeyError:
         raise KeyError("No token found in headers") 
+
+def get_username_from_token(id_token):
+    decoded_id_token = jwt.decode(id_token, options={"verify_signature": False})
+    return decoded_id_token['cognito:username']

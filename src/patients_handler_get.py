@@ -8,9 +8,11 @@ from botocore.exceptions import ClientError
 def handler(event, _):
     query_params = event['queryStringParameters']
     active = True
+    clinicianId = None
     if query_params:
         active_param = query_params.get("active", "true")
         active = active_param.lower() in ('true', '1') 
+        clinicianId = query_params.get('clinicianId', None)
     try:
         token = get_token_from_event(event)
         organization_id = token.get("custom:organizationId")
@@ -25,8 +27,13 @@ def handler(event, _):
                 if assignments and len(assignments) > 0:
                     employee = get_employee_by_id(assignments[0].get("employeeId"))
                     patient["clinicianAssigned"] = employee.get("fullName")
+                    patient["clinicianId"] = assignments[0].get("employeeId")
                 else:
                     patient["clinicianAssigned"] = None
+                    patient["clinicianId"] = None
+                    
+            if clinicianId:
+                patients = list(filter(lambda patient: patient.get("clinicianId") == clinicianId, patients))
             return create_success_response(patients)
     
     except KeyError as e:

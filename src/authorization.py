@@ -4,6 +4,7 @@ import uuid
 from botocore.exceptions import ClientError
 from src.http_response import create_success_response, create_error_response
 from src.employees import save_employee_to_db
+from src.utils.token import get_username_from_token
 
 cognito_client = boto3.client('cognito-idp')
 user_pool_id = os.environ.get('USER_POOL_ID')
@@ -80,7 +81,7 @@ def signup_new_user(full_name, email, org_id, user_type):
             Username=username
         )
 
-        save_employee_to_db(email, org_id, user_type, full_name)
+        save_employee_to_db(email, org_id, user_type, full_name, username)
         return create_success_response("User created successfully.")
     
     except ClientError as e:
@@ -109,11 +110,13 @@ def login_user(email, password):
                 access_token = authentication_result['AccessToken']
                 id_token = authentication_result['IdToken']
                 refresh_token = authentication_result['RefreshToken']
+                username = get_username_from_token(id_token)
                 
                 return create_success_response({
                 'accessToken': access_token,
                 'idToken': id_token,
                 'refreshToken': refresh_token,
+                'username': username
                 })
             else: create_error_response(401, "Failed to authenticate.")
     
@@ -139,11 +142,13 @@ def update_user_password(email, new_password, session):
         access_token = challenge_response['AuthenticationResult']['AccessToken']
         id_token = challenge_response['AuthenticationResult']['IdToken']
         refresh_token = challenge_response['AuthenticationResult']['RefreshToken']
-        
+        username = get_username_from_token(id_token)
+
         return create_success_response({
                 'accessToken': access_token,
                 'idToken': id_token,
-                'refreshToken': refresh_token
+                'refreshToken': refresh_token,
+                'username': username
         })
 
     else:
@@ -163,11 +168,13 @@ def refresh_token(refresh_token):
             authentication_result = response['AuthenticationResult']
             access_token = authentication_result['AccessToken']
             id_token = authentication_result['IdToken']
-            
+            username = get_username_from_token(id_token)
+
             return create_success_response({
                 'accessToken': access_token,
                 'idToken': id_token,
-                'refreshToken': refresh_token
+                'refreshToken': refresh_token,
+                'username': username
             })
         
         else: create_error_response(401, "Failed to authenticate.")
